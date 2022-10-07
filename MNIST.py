@@ -5,24 +5,33 @@ from matplotlib import pyplot as plt
 
 def main():
     '''
-    load and format training and test data
+    load and format training data
     '''
+    X = convertIDXToArray('./data/train-images.idx3-ubyte', 'images').astype(int)
+    Y = convertIDXToArray('./data/train-labels.idx1-ubyte', 'labels').astype(int)
     
-    training_data = convertIDXToArray('./data/train-images.idx3-ubyte', 'images')
-    training_labels = convertIDXToArray('./data/train-labels.idx1-ubyte', 'labels')
-    # test_data = convertIDXToArray('./data/t10k-images.idx3-ubyte', 'images')
-    # test_labels = convertIDXToArray('./data/t10k-labels.idx1-ubyte', 'labels')
-    X_train = training_data.astype(int).T
-    Y_train = training_labels.astype(int).T
-    # X_test = test_data.astype(int)
-    # Y_test = test_labels.astype(int)
-
+    
+    '''
+    load and format test data
+    '''
+    X = convertIDXToArray('./data/t10k-images.idx3-ubyte', 'images').astype(int)
+    Y = convertIDXToArray('./data/t10k-labels.idx1-ubyte', 'labels').astype(int)
+    
+def set_hyper_parameters():
+    return True
+    
+def train_network():
+    return True
+    
+def test_network():
+    
+    
 def softplus(Z):
     return np.log(1 + np.exp(Z))
 
 def softplus_derivative(Z):
     return np.exp(Z) / (1 + np.exp(Z))
-    
+
 def convertIDXToArray(filename, file_type):
     '''
     http://yann.lecun.com/exdb/mnist/
