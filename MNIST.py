@@ -14,30 +14,22 @@ def main():
     '''
     X = convertIDXToArray('./data/train-images.idx3-ubyte', 'images').astype(int)
     X = X.T
-    #X = normalize(X)
-    
     Y = convertIDXToArray('./data/train-labels.idx1-ubyte', 'labels').astype(int)
     Y = Y.T
-    
     W1, W2, b1, b2, C, alpha, epoch = initialize_parameters()
     Y = one_hot_encode(Y, C)
-
     '''
     Train network
     '''
     W1, W2, b1, b2 = train_neural_network(X, Y, W1, W2, b1, b2, alpha, epoch)
-    
     '''
     load and format test data
     '''
     X = convertIDXToArray('./data/t10k-images.idx3-ubyte', 'images').astype(int)
     X = X.T
-    #X = normalize(X)
-
     Y = convertIDXToArray('./data/t10k-labels.idx1-ubyte', 'labels').astype(int)
     Y = Y.T
     Y = one_hot_encode(Y, C)
-
     '''
     Test network
     '''
@@ -47,19 +39,17 @@ def main():
 def initialize_parameters():
     C = 10 # no of classes
     h = 15 # hidden layer size
-    rng = np.random.default_rng(123)
+    rng = np.random.default_rng()
     W1 = (rng.random(size = (h, 28 * 28)) - 0.5) * np.sqrt(2 / 10)
     W2 = (rng.random(size = (C, h)) - 0.5) * np.sqrt(2 / 10)
     b1 = np.zeros((h, 1))
     b2 = np.zeros((C, 1))
     alpha = 0.1
-    epoch = 500
+    epoch = 1000
     return W1, W2, b1, b2, C, alpha, epoch
 
 def train_neural_network(X, Y, W1, W2, b1, b2, alpha, epoch):
-
     cost = np.empty(epoch)
-
     for i in range(epoch):
         Z1, Z2, A1, A2 = forward_propagate(X, W1, W2, b1, b2)
         cost[i] = cross_entropy_cost(Y, A2)
@@ -67,7 +57,6 @@ def train_neural_network(X, Y, W1, W2, b1, b2, alpha, epoch):
             print(cost[i])
         dW1, dW2, db1, db2 = backward_propagate(X, Y, W1, W2, b1, b2, Z1, Z2, A1, A2)
         W1, W2, b1, b2 = update_parameters(W1, W2, b1, b2, dW1, dW2, db1, db2, alpha)
-
     return W1, W2, b1, b2
 
 def forward_propagate(X, W1, W2, b1, b2):
@@ -104,7 +93,6 @@ def backward_propagate(X, Y, W1, W2, b1, b2, Z1, Z2, A1, A2):
     dW2 = 1 / m * dZ2.dot(A1.T)
     db2 = 1 / m * np.sum(dZ2, axis = 1, keepdims = True)
     dA1 = W2.T.dot(dZ2)
-    
     dZ1 = dA1 * sigmoid_derivative(Z1)
     dW1 = 1 / m * dZ1.dot(X.T)
     db1 = 1 / m * np.sum(dZ1, axis = 1, keepdims = True)
@@ -158,32 +146,26 @@ def convertIDXToArray(filename, file_type):
     https://medium.com/the-owl/converting-mnist-data-in-idx-format-to-python-numpy-array-5cb9126f99f1
     https://docs.python.org/3/library/struct.html
     '''
-    
     # Open the IDX files in readable binary mode
     data_file = open(filename, 'rb')
-    
     # Read the magic number
     # ‘>’: big-endian
     # ‘4B’: 4 bytes unsigned char
     data_file.seek(0)
     _ = st.unpack('>4B', data_file.read(4))
-    
     # Read the dimensions of the Image data-set
     # ‘>’: big-endian
     # ‘I’: unsigned int
     nImg = st.unpack('>I', data_file.read(4))[0] # num of images
-    nImg = 1000
     if file_type == 'images':
         nR = st.unpack('>I', data_file.read(4))[0] # num of rows
         nC = st.unpack('>I', data_file.read(4))[0] # num of column
-
     # Declare Image NumPy array
     if file_type == 'images':
         indata_array = np.zeros((nImg, nR, nC))
         outdata_array = np.zeros((nImg, nR * nC), dtype = int)
     elif file_type == 'labels':
         outdata_array = np.zeros((nImg), dtype = int)
-
     # Reading the Image data
     # ‘>’: big-endian
     # ‘B’: unsigned char
