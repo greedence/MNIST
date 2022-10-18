@@ -1,43 +1,60 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from matplotlib import pyplot as plt
 
 class MNIST_FCNN:
-    def __init__(self, alpha, epoch, input_layer, classes, hidden_layer):
+    def __init__(self, alpha, epoch, input_layer, classes, hidden_layer, seed):
         self.__alpha = alpha
         self.__epoch = epoch
         self.__input_layer = input_layer
         self.__classes = classes
         self.__hidden_layer = hidden_layer
-
-        rng = np.random.default_rng()
-        self.__W1 = (rng.random(size = (self.__hidden_layer, self.__input_layer)) - 0.5) * np.sqrt(2 / 10)
-        self.__W2 = (rng.random(size = (self.__classes, self.__hidden_layer)) - 0.5) * np.sqrt(2 / 10)
+        rng = np.random.default_rng(seed)
+        self.__W1 = (rng.random(size = (self.__hidden_layer, self.__input_layer)) - 0.5)
+        self.__W2 = (rng.random(size = (self.__classes, self.__hidden_layer)) - 0.5)
         self.__b1 = np.zeros((self.__hidden_layer, 1))
         self.__b2 = np.zeros((self.__classes, 1))
-    
+        self.A2 = None
+        self.cost = np.empty(self.__epoch)
+        self.accuracy = 0
+        
     def get_classes(self):
         return self.__classes
 
+    def get_predictions(self):
+        return self.A2
+
+    def get_cost(self):
+        return self.cost
+    
     def train(self, ds):
-        cost = np.empty(self.__epoch)
         for i in range(self.__epoch):
-            Z1, Z2, A1, A2 = self.__forward_propagate(ds)
-            cost[i] = self.__cross_entropy_cost(ds.get_labels(), A2)
-            dW1, dW2, db1, db2 = self.__backward_propagate(ds, Z1, Z2, A1, A2)
+            Z1, Z2, A1 = self.__forward_propagate(ds)
+            self.cost[i] = self.__cross_entropy_cost(ds.get_labels(), self.A2)
+            dW1, dW2, db1, db2 = self.__backward_propagate(ds, Z1, Z2, A1, self.A2)
             self.__update_parameters(dW1, dW2, db1, db2)
-        return cost
     
     def __forward_propagate(self, ds):
         Z1 = self.__W1.dot(ds.get_images()) + self.__b1
         A1 = self.__sigmoid_stable(Z1)
         Z2 = self.__W2.dot(A1) + self.__b2
-        A2 = self.__stable_softmax(Z2)
-        return Z1, Z2, A1, A2
+        self.A2 = self.__stable_softmax(Z2)
+        return Z1, Z2, A1
 
+    def get_accuracy(self):
+        return np.count_nonzero(self.accuracy) / np.size(self.accuracy)
+    
     def test(self, ds):
-        _, _, _, A2 = self.__forward_propagate(ds)
-        accuracy = np.argmax(ds.get_labels(), axis = 0) == np.argmax(A2, axis = 0)
-        return np.count_nonzero(accuracy) / np.size(accuracy)
+        _, _, _ = self.__forward_propagate(ds)
+        self.accuracy = np.argmax(ds.get_labels(), axis = 0) == np.argmax(self.A2, axis = 0)
+    
+    def test_random(self, ds, pixels_x, pixels_y):
+        _, m = ds.get_labels().shape
+        image = np.random.randint(m)
+        plt.imshow(np.reshape(ds.get_images().T[image], (pixels_x, pixels_y)))
+        plt.show()
+        print('prediction: ', self.get_predictions().T[image].argmax())
+        print('true label: ', ds.get_labels().T[image].argmax())
 
     def __sigmoid_stable(self, Z):
         return np.where(Z < 0, np.exp(Z) / (1 + np.exp(Z)), 1 / (1 + np.exp(-Z)))

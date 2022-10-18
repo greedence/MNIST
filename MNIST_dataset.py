@@ -57,7 +57,6 @@ class MNIST_dataset:
         # ‘>’: big-endian
         # ‘I’: unsigned int
         nImg = st.unpack('>I', data_file.read(4))[0] # num of images
-        #nImg = 1000
         if file_type == 'images':
             nR = st.unpack('>I', data_file.read(4))[0] # num of rows
             nC = st.unpack('>I', data_file.read(4))[0] # num of column
