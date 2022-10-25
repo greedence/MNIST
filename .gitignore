@@ -2,3 +2,6 @@
 __pycache__
 git commands.txt
 data
+ds_training.p
+ds_test.p
+nn.p
