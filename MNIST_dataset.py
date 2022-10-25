@@ -22,14 +22,14 @@ class MNIST_dataset:
     def get_labels(self):
         return self.__labels
 
-    def load_training_dataset(self):
-        self.__images = self.__convertIDXToArray(self.__training_dataset['images'], 'images')
-        self.__labels = self.__convertIDXToArray(self.__training_dataset['labels'], 'labels')
+    def load_training_dataset(self, no_of_pictures):
+        self.__images = self.__convertIDXToArray(self.__training_dataset['images'], 'images', no_of_pictures)
+        self.__labels = self.__convertIDXToArray(self.__training_dataset['labels'], 'labels', no_of_pictures)
         self.__labels = self.__one_hot_encode()
         
-    def load_test_dataset(self):
-        self.__images = self.__convertIDXToArray(self.__test_dataset['images'], 'images')
-        self.__labels = self.__convertIDXToArray(self.__test_dataset['labels'], 'labels')
+    def load_test_dataset(self, no_of_pictures):
+        self.__images = self.__convertIDXToArray(self.__test_dataset['images'], 'images', no_of_pictures)
+        self.__labels = self.__convertIDXToArray(self.__test_dataset['labels'], 'labels', no_of_pictures)
         self.__labels = self.__one_hot_encode()
 
     def __one_hot_encode(self):
@@ -39,7 +39,14 @@ class MNIST_dataset:
             one_hot_encoded_labels[self.__labels[i]][i] = 1
         return one_hot_encoded_labels
 
-    def __convertIDXToArray(self, filename, file_type):
+    def normalize(self):
+        _, m = self.__labels.shape
+        mu = 1 / m * np.sum(self.__labels, axis = 0)
+        self.__labels = self.__labels - mu
+        sigma2 = 1 / m * np.sum(np.square(self.__labels), axis = 0)
+        self.__labels = self.__labels / sigma2
+
+    def __convertIDXToArray(self, filename, file_type, no_of_pictures):
         '''
         http://yann.lecun.com/exdb/mnist/
         convert MNIST data set to a numpy array
@@ -57,7 +64,8 @@ class MNIST_dataset:
         # ‘>’: big-endian
         # ‘I’: unsigned int
         nImg = st.unpack('>I', data_file.read(4))[0] # num of images
-        #nImg = 1000
+        if no_of_pictures != 0:
+            nImg = no_of_pictures
         if file_type == 'images':
             nR = st.unpack('>I', data_file.read(4))[0] # num of rows
             nC = st.unpack('>I', data_file.read(4))[0] # num of column
