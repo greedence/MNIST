@@ -4,13 +4,18 @@ inspired by 'The Independent Code'
 https://www.youtube.com/channel/UC1OLIHvAKBQy3o5LcbbxUSg
 '''
 import numpy as np
+
 from layer import dense
 from activations import sigmoid
 from losses import mse, mse_derivative
 
+#from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+
 def main():
     X = np.reshape([[0, 0], [0, 1], [1, 0], [1, 1]], (4, 2, 1))
     Y = np.reshape([[0], [1], [1], [0]], (4, 1, 1))
+
     network = [
         dense(2, 2),
         sigmoid(),
@@ -19,15 +24,16 @@ def main():
         ]
     epochs = 1000
     alpha = 1
-    
+
     for e in range(epochs):
         error = 0
         for x, y in zip(X, Y):
 
             # forward propagate
-            output = x
+            input = x
             for layer in network:
-                output = layer.forward_propagate(output)
+                output = layer.forward_propagate(input)
+                input = output
 
             # error
             error = mse(y, output)
@@ -40,31 +46,32 @@ def main():
         error /= len(X)
         if (e + 1) % 100 == 0 or e == 0:
             print('epoch %d/%d, error = %f' % (e + 1, epochs, error))
-    print()
-    for i in range(4):
-        output = np.array(X[i])
-        for layer in network:
-            output = layer.forward_propagate(output)
-        print('layer one weights')
-        print(network[0].weights)
-        print('layer one bias')
-        print(network[0].bias)
-        print('layer one output')
-        print(network[1].input)
-        print('layer one activated output')
-        print(network[2].input)
-        print()
-        print('layer two weights')
-        print(network[2].weights)
-        print('layer two bias')
-        print(network[2].bias)
-        print('layer two output')
-        print(network[3].input)
-        print('layer two activated output')
-        print(np.where(network[3].input < 0, np.exp(network[3].input) / (1 + np.exp(network[3].input)), 1 / (1 + np.exp(-network[3].input))))
-        print('prediction for', X[i][0], X[i][1], 'is', output[0])
-        print()
 
+    # test
+    nx, ny = (11, 11)
+    x = np.linspace(0, 1, nx)
+    y = np.linspace(0, 1, ny)
+    xv, yv = np.meshgrid(x, y, sparse = False)
+    z = np.empty(shape = (nx, ny))
+
+    ax = plt.axes(projection='3d')
+    ax.set_title('xor')
+    ax.set_xlabel('x1')
+    ax.set_ylabel('x2')
+    ax.set_zlabel('prediction')
+    #ax.view_init(15, 230)
+
+    for i in range(nx):
+        for j in range(ny):
+            input = np.reshape((xv[i, j], yv[i, j]), (2, 1))
+            for layer in network:
+                output = layer.forward_propagate(input)
+                input = output
+            z[i][j] = output
+
+    ax.plot_surface(xv, yv, z)
+    plt.savefig('xor_plot.png', dpi = 600)
+    plt.show
 
 if __name__ == '__main__':
     main()
