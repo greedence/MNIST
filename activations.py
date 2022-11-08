@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+'''
+inspired by Omar Aflak from 'The Independent Code'
+https://www.youtube.com/channel/UC1OLIHvAKBQy3o5LcbbxUSg
+https://www.youtube.com/watch?v=Lakz2MoHy6o&list=PLQ4osgQ7WN6PGnvt6tzLAVAEMsL3LBqpm&index=2
+'''
+
 import numpy as np
 from layer import layer
 
@@ -37,9 +43,3 @@ class softplus(activation):
         softplus = lambda z: np.log(1 + np.exp(z))
         softplus_derivative = lambda z: 1 / (1 + np.exp(-z))
         super().__init__(softplus, softplus_derivative)
-
-class softmax(activation):
-    def __init__(self):
-        softmax = lambda z: np.exp(z - np.max(z)) / np.sum(np.exp(z - np.max(z)), axis = 0, keepdims = True)
-        softmax_derivative = lambda z: z
-        super().__init__(softmax, softmax_derivative)

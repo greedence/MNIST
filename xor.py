@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 '''
-inspired by 'The Independent Code'
+inspired by Omar Aflak from 'The Independent Code'
 https://www.youtube.com/channel/UC1OLIHvAKBQy3o5LcbbxUSg
+https://www.youtube.com/watch?v=Lakz2MoHy6o&list=PLQ4osgQ7WN6PGnvt6tzLAVAEMsL3LBqpm&index=2
 '''
+
 import numpy as np
 
 from layer import dense
@@ -44,7 +46,7 @@ def main():
                 gradient = layer.backward_propagate(gradient, alpha)
 
         error /= len(X)
-        if (e + 1) % 100 == 0 or e == 0:
+        if (e + 1) % 250 == 0 or e == 0:
             print('epoch %d/%d, error = %f' % (e + 1, epochs, error))
 
     # test
