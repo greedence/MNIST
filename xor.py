@@ -72,7 +72,7 @@ def main():
             z[i][j] = output
 
     ax.plot_surface(xv, yv, z)
-    plt.savefig('xor_plot.png', dpi = 600)
+    plt.savefig('./data/xor_plot.png', dpi = 600)
     plt.show
 
 if __name__ == '__main__':
